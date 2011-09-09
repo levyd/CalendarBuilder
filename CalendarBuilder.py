@@ -12,10 +12,18 @@ class CalendarBuilder(HTMLParser):
         self.eventclassname = 'dddefault'
 
     def find_event(self, tag, attrs):
+        #if tag == "td":
+            #print self.get_starttag_text()
+
+        print "Finding event..."
         for key, value in attrs:
             if key == 'class':
+                #print "Class: %s" % value
                 if value == self.eventclassname:
+                    print "Match!"
                     return 'EVENTFOUND'
+
+        print "No match"
         return 'FINDEVENT'
 
     def check_event(self, tag, attrs):
@@ -50,6 +58,7 @@ class CalendarBuilder(HTMLParser):
         return self.state
 
     def handle_starttag(self, tag, attrs):
+        print "Initial state: %s" % self.state
         self.state = { 'FINDEVENT':   self.find_event,
                        'EVENTFOUND':  self.check_event,
                        'GETNAME':     self.ignore_tag,
@@ -58,6 +67,7 @@ class CalendarBuilder(HTMLParser):
                        'GETLOCATION': self.ignore_tag,
                        None:          self.ignore_tag,
                      }[self.state](tag, attrs)
+        print "State changed to: %s" % self.state
 
     def handle_data(self, data):
         self.state = { 'FINDEVENT':   self.ignore_data,
