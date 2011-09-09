@@ -4,12 +4,8 @@ import argparse
 from HTMLParser import HTMLParser
 
 class CalendarBuilder(HTMLParser):
-'''Parses an HTML file (containing a dalonline calendar),
-and writes an iCal file containing the events'''
-
-    dayofweek = 0
-    state = 'FINDEVENT'
-    eventclassname = 'dddefault'
+    '''Parses an HTML file (containing a dalonline calendar),
+    and writes an iCal file containing the events'''
 
     def __init__(self):
         HTMLParser.__init__(self)
@@ -18,10 +14,18 @@ and writes an iCal file containing the events'''
         self.eventclassname = 'dddefault'
 
     def find_event(self, tag, attrs):
+        #if tag == "td":
+            #print self.get_starttag_text()
+
+        print "Finding event..."
         for key, value in attrs:
             if key == 'class':
+                #print "Class: %s" % value
                 if value == self.eventclassname:
+                    print "Match!"
                     return 'EVENTFOUND'
+
+        print "No match"
         return 'FINDEVENT'
 
     def check_event(self, tag, attrs):
@@ -56,6 +60,7 @@ and writes an iCal file containing the events'''
         return self.state
 
     def handle_starttag(self, tag, attrs):
+        print "Initial state: %s" % self.state
         self.state = { 'FINDEVENT':   self.find_event,
                        'EVENTFOUND':  self.check_event,
                        'GETNAME':     self.ignore_tag,
@@ -64,6 +69,7 @@ and writes an iCal file containing the events'''
                        'GETLOCATION': self.ignore_tag,
                        None:          self.ignore_tag,
                      }[self.state](tag, attrs)
+        print "State changed to: %s" % self.state
 
     def handle_data(self, data):
         self.state = { 'FINDEVENT':   self.ignore_data,
