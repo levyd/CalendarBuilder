@@ -1,1 +1,8 @@
+#CalendarBuilder
 This program parses a dalonline HTML table calendar into an iCal file.
+
+#USAGE:
+python parse.py infile outfile
+
+#NOTE:
+Currently non-operational, under development
