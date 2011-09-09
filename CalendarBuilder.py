@@ -11,28 +11,21 @@ class CalendarBuilder(HTMLParser):
         HTMLParser.__init__(self)
         self.dayofweek = 0
         self.state = 'FINDEVENT'
-        self.eventclassname = 'dddefault'
+        self.eventclassname = 'ddlabel'
 
     def find_event(self, tag, attrs):
-        #if tag == "td":
-            #print self.get_starttag_text()
-
-        print "Finding event..."
-        for key, value in attrs:
-            if key == 'class':
-                #print "Class: %s" % value
-                if value == self.eventclassname:
-                    print "Match!"
+        if tag == "td":
+            for key, value in attrs:
+                if key == 'class' and value == self.eventclassname:
+                    #print self.get_starttag_text()
                     return 'EVENTFOUND'
-
-        print "No match"
         return 'FINDEVENT'
 
     def check_event(self, tag, attrs):
         if tag == 'a':
             return 'GETNAME'
         else:
-            raise Exception("Unexpected tag");
+            raise Exception.NotImplemented
 
     def ignore_tag(self, tag, attrs):
         return self.state
@@ -60,7 +53,7 @@ class CalendarBuilder(HTMLParser):
         return self.state
 
     def handle_starttag(self, tag, attrs):
-        print "Initial state: %s" % self.state
+        #print "Tag: Initial state: %s" % self.state
         self.state = { 'FINDEVENT':   self.find_event,
                        'EVENTFOUND':  self.check_event,
                        'GETNAME':     self.ignore_tag,
@@ -69,17 +62,19 @@ class CalendarBuilder(HTMLParser):
                        'GETLOCATION': self.ignore_tag,
                        None:          self.ignore_tag,
                      }[self.state](tag, attrs)
-        print "State changed to: %s" % self.state
+        #print "Tag: State changed to: %s" % self.state
 
     def handle_data(self, data):
+        #print "Data: Initial state: %s" % self.state
         self.state = { 'FINDEVENT':   self.ignore_data,
-                       'EVENTFOUND':  self.invalid_event,
+                       'EVENTFOUND':  self.ignore_data,
                        'GETNAME':     self.get_event_name,
                        'GETID':       self.get_event_id,
                        'GETTIME':     self.get_event_time,
                        'GETLOCATION': self.get_event_location,
                        None:          self.ignore_data,
                      }[self.state](data)
+        #print "Data: State changed to: %s" % self.state
 
 argparser = argparse.ArgumentParser(
     description = 'Convert a dalonline html calendar to iCal format'
