@@ -7,10 +7,6 @@ class CalendarBuilder(HTMLParser):
 '''Parses an HTML file (containing a dalonline calendar),
 and writes an iCal file containing the events'''
 
-    dayofweek = 0
-    state = 'FINDEVENT'
-    eventclassname = 'dddefault'
-
     def __init__(self):
         HTMLParser.__init__(self)
         self.dayofweek = 0
