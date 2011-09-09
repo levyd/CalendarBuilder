@@ -4,5 +4,14 @@ This program parses a dalonline HTML table calendar into an iCal file.
 #USAGE:
 python parse.py infile outfile
 
+#DEPENDS:
+python: 2.3 <= version < 3.0
+iCalendar
+
+wget http://codespeak.net/icalendar/iCalendar-1.2.tgz
+tar -xvzf iCalendar-1.2.tgz
+cd iCalendar-1.2
+sudo python setup.py install
+
 #NOTE:
 Currently non-operational, under development

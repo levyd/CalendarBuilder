@@ -13,6 +13,7 @@ def run():
 
     webpage = CalendarBuilder() 
     webpage.feed(args.infile.read())
+    args.outfile.write(webpage.calendar.as_string())
 
 if __name__ == '__main__':
     run()
