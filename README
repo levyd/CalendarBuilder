@@ -6,7 +6,13 @@ python parse.py infile outfile
 
 #DEPENDS:
 python: 2.3 <= version < 3.0
+BeautifulSoup
 iCalendar
+
+wget http://www.crummy.com/software/BeautifulSoup/download/3.x/BeautifulSoup-3.2.0.tar.gz
+tar -xvzf BeautifulSoup-3.2.0.tar.gz
+cd BeautifulSoup-3.2.0
+sudo python setup.py install
 
 wget http://codespeak.net/icalendar/iCalendar-1.2.tgz
 tar -xvzf iCalendar-1.2.tgz
