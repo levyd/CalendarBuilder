@@ -1,1 +1,2 @@
-It doesn't work
+* All events are moved to the Monday at the beginning of the week, because
+  day-of-week identification hasn't been implemented yet.

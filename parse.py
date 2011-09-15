@@ -10,10 +10,9 @@ def run():
     argparser.add_argument('outfile', type=argparse.FileType('w'))
     args = argparser.parse_args()
 
-
-    webpage = CalendarBuilder() 
-    webpage.feed(args.infile.read())
-    args.outfile.write(webpage.calendar.as_string())
+    builder = CalendarBuilder() 
+    builder.parse(args.infile)
+    builder.export(args.outfile)
 
 if __name__ == '__main__':
     run()

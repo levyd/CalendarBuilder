@@ -1,88 +1,46 @@
-#!/usr/bin/python
-from HTMLParser import HTMLParser
-from datetime import datetime
+from BeautifulSoup import BeautifulSoup
 from icalendar import Calendar, Event
+from datetime import datetime
+import re
 
-class CalendarBuilder(HTMLParser):
-    '''Parses an HTML file (containing a dalonline calendar),
-    and writes an iCal file containing the events'''
-
+class CalendarBuilder:
     def __init__(self):
-        HTMLParser.__init__(self)
-        self.dayofweek = 0
-        self.state = "FINDEVENT"
-        self.eventclassname = "ddlabel"
         self.calendar = Calendar()
 
-        self.events = []
-        self.events_index = 0;
-            # This is gross and I hate it
+    def parse(self, infile):
+        """Parses the dalonline HTML into a schedule for one week"""
+        doc = BeautifulSoup(infile.read())
 
-    def find_event(self, tag, attrs):
-        if tag == "td":
-            for key, value in attrs:
-                if key == "class" and value == self.eventclassname:
-                    return "EVENTFOUND"
-        return "FINDEVENT"
-
-    def check_event(self, tag, attrs):
-        if tag == "a":
-            return "GETNAME"
+        # Get the base date (Monday) of the webpage's calendar
+        weekoftag = doc.find(text=re.compile("Week of .*"))
+        weekofre = re.search("Week of (.*)", weekoftag)
+        if weekofre is None:
+            raise Exception("Oh shit")
         else:
-            raise Exception.NotImplemented
+            weekof = str(weekofre.group(1))
+            print "Base day: %s" % weekof
 
-    def ignore_tag(self, tag, attrs):
-        return self.state
+        # Identify all events in the webpage's calendar
+        for entry in doc.findAll("td", attrs={"class" : "ddlabel"}):
+            strings = entry.findAll(text=True)
+            event = Event()
 
-    def invalid_event(self, data):
-        return "FINDEVENT"
+            print "Summary: %s" % strings[0]
+            event.add("summary", strings[0])
 
-    def get_event_name(self, data):
-        print "Event: %s" % data
-        self.events.append(Event())
-        self.events[self.events_index].add("summary", data)
-        return "GETID"
+            print "Time: %s" % strings[2]
+            match = re.search("(\d\d?:\d\d [a|p]m)-(\d\d?:\d\d [a|p]m)", strings[2])
+            if match is None:
+                continue
+            else:
+                event.add("dtstart", datetime.strptime(weekof + match.group(1), "%b %d, %Y%I:%M %p")) # Plus dow
+                event.add("dtend", datetime.strptime(weekof + match.group(2), "%b %d, %Y%I:%M %p"))
 
-    def get_event_id(self, data):
-        print "ID: %s" % data
-        return "GETTIME"
-        
-    def get_event_time(self, data):
-        print "Time: %s" % data
-        self.events[self.events_index].add("dtstart", datetime(1970, 1, 1, 0, 0, 0))
-        self.events[self.events_index].add("dtend", datetime(1970, 1, 1, 1, 0, 0))
-        return "GETLOCATION"
+            print "Location: %s" % strings[3]
+            self.calendar.add_component(event)
 
-    def get_event_location(self, data):
-        print "Location: %s" % data
-        self.calendar.add_component(self.events[self.events_index])
-        self.events_index += 1
-        return "FINDEVENT"
+    def repeat(self, begindate, enddate):
+        pass
 
-    def ignore_data(self, data):
-        return self.state
-
-    def handle_starttag(self, tag, attrs):
-        #print "Tag: Initial state: %s" % self.state
-        self.state = { "FINDEVENT":   self.find_event,
-                       "EVENTFOUND":  self.check_event,
-                       "GETNAME":     self.ignore_tag,
-                       "GETID":       self.ignore_tag,
-                       "GETTIME":     self.ignore_tag,
-                       "GETLOCATION": self.ignore_tag,
-                       None:          self.ignore_tag,
-                     }[self.state](tag, attrs)
-        #print "Tag: State changed to: %s" % self.state
-
-    def handle_data(self, data):
-        #print "Data: Initial state: %s" % self.state
-        self.state = { "FINDEVENT":   self.ignore_data,
-                       "EVENTFOUND":  self.ignore_data,
-                       "GETNAME":     self.get_event_name,
-                       "GETID":       self.get_event_id,
-                       "GETTIME":     self.get_event_time,
-                       "GETLOCATION": self.get_event_location,
-                       None:          self.ignore_data,
-                     }[self.state](data)
-        #print "Data: State changed to: %s" % self.state
-
+    def export(self, outfile):
+        outfile.write(self.calendar.as_string())
