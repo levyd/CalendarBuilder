@@ -1,2 +1,2 @@
-* All events are moved to the Monday at the beginning of the week, because
-  day-of-week identification hasn't been implemented yet.
+* Schedule reads only one week; should be able to repeat until enddate.
+* Probably isn't compatible with Google Calendar quite yet.

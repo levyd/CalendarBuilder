@@ -1,2 +1,3 @@
-* Identify day-of-week for each event, and add it to each event
+* Make ical google-compatible
+* Implement repeat-until
 
