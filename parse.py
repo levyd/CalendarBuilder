@@ -8,9 +8,12 @@ def run():
     )
     argparser.add_argument('infile', type=argparse.FileType('r'))
     argparser.add_argument('outfile', type=argparse.FileType('w'))
+    argparser.add_argument('-r', '--recur')
     args = argparser.parse_args()
 
     builder = CalendarBuilder() 
+    if args.recur is not None:
+        builder.setEndDate(args.recur)
     builder.parse(args.infile)
     builder.export(args.outfile)
 
